@@ -1,0 +1,36 @@
+#!/bin/bash
+# This is a simple build script and will be executed on your CI system if 
+# available.  Otherwise it will execute while your application is stopped
+# before the deploy step.  This script gets executed directly, so it
+# could be python, php, ruby, etc.
+
+DEV_REQUIREMENTS=$OPENSHIFT_REPO_DIR/dev_requirements.txt
+REQUIREMENTS=$OPENSHIFT_REPO_DIR/requirements.txt
+VIRTUALENV_DIR=$OPENSHIFT_DATA_DIR/virtualenv
+
+# Activate virtualenv
+echo "[BUILD] (virtualenv) Activate environment"
+source $VIRTUALENV_DIR/bin/activate
+echo "[BUILD] (virtualenv) environment is active"
+
+# Install development dependencies
+if [ -f $DEV_REQUIREMENTS ]
+then
+    echo "[BUILD] (requirements) Install dev_requirements.txt"
+	pip install -r $DEV_REQUIREMENTS
+	echo "[BUILD] (requirements) Development requirements installed"
+fi
+
+# Install dependencies
+if [ -f $REQUIREMENTS ]
+then
+	echo "[BUILD] (requirements) Install requirements.txt"
+	pip install -r $REQUIREMENTS
+	echo "[BUILD] (requirements) Requirements installed"
+fi
+
+# Notify if no requirements were found
+if [ ! -f $DEV_REQUIREMENTS ] && [ ! -f $REQUIREMENTS ]
+then
+	echo "[BUILD] (requirements) No requirements files found"
+fi
