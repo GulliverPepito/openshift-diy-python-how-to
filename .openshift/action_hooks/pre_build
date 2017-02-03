@@ -1,0 +1,50 @@
+#!/bin/bash
+# This is a simple script and will be executed on your CI system if 
+# available.  Otherwise it will execute while your application is stopped
+# before the build step.  This script gets executed directly, so it
+# could be python, php, ruby, etc.
+
+PYTHON3=${OPENSHIFT_DATA_DIR}/bin/python3
+PIP3=${OPENSHIFT_DATA_DIR}/bin/pip3
+
+PYTHON_VERSION="3.5.3"
+PYTHON_CURRENT=`${PYTHON3} -c 'import sys; print(".".join(map(str, sys.version_info[:3])))'`
+VIRTUALENV_DIR=$OPENSHIFT_DATA_DIR/virtualenv
+
+# Check Python version
+echo "[PRE BUILD] (python3) Verification of Python version (${PYTHON_VERSION})"
+if [ "${PYTHON_CURRENT}" != "${PYTHON_VERSION}" ]
+then
+	echo "[PRE BUILD] (python3) WARNING: Python versions do not match (found Python ${PYTHON_CURRENT})"
+	echo "[PRE BUILD] (python3) WARNING: Installing Python ${PYTHON_VERSION} from source"
+	cd $OPENSHIFT_TMP_DIR
+	wget https://www.python.org/ftp/python/3.5.3/Python-3.5.3.tgz
+	tar xf Python-3.5.3.tgz
+	cd Python-3.5.3
+	./configure --prefix=$OPENSHIFT_DATA_DIR
+	make install
+fi
+echo "[PRE BUILD] (python3) Current Python is Python ${PYTHON_VERSION}"
+
+
+# Check virtualenv existence
+echo "[PRE BUILD] (virtualenv) Check if environment exists"
+if [ ! -d $VIRTUALENV_DIR ]
+then
+	echo "[PRE BUILD] (virtualenv) WARNING: Virtual environment does not exists"
+	echo "[PRE BUILD] (virtualenv) WARNING: Procceding to create environment (at ${VIRTUALENV_DIR})"
+	$PYTHON3 -m venv $VIRTUALENV_DIR
+	source $VIRTUALENV_DIR/bin/activate
+	deactivate
+fi
+echo "[PRE BUILD] (virtualenv) virtualenv created"
+
+
+# Cleanup (ony if needed)
+if [ ! "$(ls -A $OPENSHIFT_TMP_DIR)" ]
+then
+	echo "[PRE BUILD] (cleanup) Cleanup of TMP dir"
+	rm -rf $OPENSHIFT_TMP_DIR/*
+	echo "[PRE BUILD] (cleanup) Cleanup completed"
+fi
+
