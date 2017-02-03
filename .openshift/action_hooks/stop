@@ -1,0 +1,25 @@
+#!/bin/bash
+# The logic to stop your application should be put in this script.
+
+PIDFILE=${OPENSHIFT_DATA_DIR}/gunicorn.pid
+
+# Pidfile
+echo "[STOP] (pidfile) Check if PID file exists"
+if [ -f $PIDFILE ]
+then
+    PID=$(<"$PIDFILE")
+    echo "[STOP] (pidfile) PID file founded (pid=${PID})"   
+    # Kill process
+	if ps -p $PID > /dev/null
+	then
+	    kill -15 $PID
+	    echo "[STOP] (kill) Process was killed"
+	else
+	    echo "[STOP] (kill) Process was already dead"
+	fi 
+else
+    echo "[STOP] (pidfile) WARNING: PID file was not present (${PIDFILE})"
+    echo "[STOP] (pidfile) WARNING: No process was killed"
+fi
+
+exit 0
