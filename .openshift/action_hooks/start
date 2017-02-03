@@ -1,0 +1,41 @@
+#!/bin/bash
+# The logic to start up your application should be put in this
+# script. The application will work only if it binds to
+# $OPENSHIFT_INTERNAL_IP:8080
+
+ADDRESS=${OPENSHIFT_DIY_IP}:${OPENSHIFT_DIY_PORT}
+PIDFILE=${OPENSHIFT_DATA_DIR}/gunicorn.pid
+LOGFILE=${OPENSHIFT_LOG_DIR}/gunicorn.log
+LOGLEVEL=DEBUG
+WORKERS=4
+
+VIRTUALENV_DIR=$OPENSHIFT_DATA_DIR/virtualenv
+
+# Stop application
+echo "[START] (stop) Proceeding to STOP application"
+${OPENSHIFT_REPO_DIR}.openshift/action_hooks/stop
+if [[ ! $? -eq 0 ]]
+then
+    echo "[START] (stop) WARNING: Could not stop application"
+else
+    echo "[START] (stop) Successfully stopped application"
+fi
+
+
+# Activate virtualenv
+echo "[START] (virtualenv) Activate environment"
+source $VIRTUALENV_DIR/bin/activate
+echo "[START] (virtualenv) environment is active"
+
+
+# Run script in a new process
+echo "[START] (gunicorn) Proceeding to execute gunicorn"
+cd $OPENSHIFT_REPO_DIR
+gunicorn demo:app \
+    --bind ${ADDRESS} \
+    --pid ${PIDFILE} \
+    --log-file=${LOGFILE} \
+    --log-level ${LOGLEVEL} \
+    --workers ${WORKERS} \
+    --reload &
+echo "[START] (gunicorn) Process is running"
