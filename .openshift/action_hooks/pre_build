@@ -7,7 +7,7 @@
 PYTHON3=${OPENSHIFT_DATA_DIR}/bin/python3
 PIP3=${OPENSHIFT_DATA_DIR}/bin/pip3
 
-PYTHON_VERSION="3.5.3"
+PYTHON_VERSION="3.6.1"
 PYTHON_CURRENT=`${PYTHON3} -c 'import sys; print(".".join(map(str, sys.version_info[:3])))'`
 VIRTUALENV_DIR=$OPENSHIFT_DATA_DIR/virtualenv
 
@@ -18,9 +18,9 @@ then
 	echo "[PRE BUILD] (python3) WARNING: Python versions do not match (found Python ${PYTHON_CURRENT})"
 	echo "[PRE BUILD] (python3) WARNING: Installing Python ${PYTHON_VERSION} from source"
 	cd $OPENSHIFT_TMP_DIR
-	wget https://www.python.org/ftp/python/3.5.3/Python-3.5.3.tgz
-	tar xf Python-3.5.3.tgz
-	cd Python-3.5.3
+	wget https://www.python.org/ftp/python/3.6.1/Python-3.6.1.tgz
+	tar xf Python-3.6.1.tgz
+	cd Python-3.6.1
 	./configure --prefix=$OPENSHIFT_DATA_DIR
 	make install
 fi
